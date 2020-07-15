@@ -3,9 +3,9 @@
 TODO: add description
 
 Schematic
-<img src="hw/pressure-dash/pressure-dash.svg">
+<img src="hw/pressure-dash.svg">
 
 Pictures
-<img src="hw/pressure-dash/sim.png">
+<img src="hw/sim.png">
 
 
