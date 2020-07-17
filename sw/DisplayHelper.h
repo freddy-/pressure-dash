@@ -7,6 +7,8 @@
 
 #define I2C_ADDRESS 0x3D
 #define SHIFT_UP_RPM 2000
+#define OIL_PRESSURE_LIMIT 80
+#define GAS_PRESSURE_LIMIT 200
 
 class DisplayHelper {
   public:
@@ -15,14 +17,19 @@ class DisplayHelper {
     void drawLogo();
     void drawBar(byte startColumn, int value);
     void setInverted(bool mode);
-    void showValues(int val0, int val1);
+    void showPressures(int val0, int val1);
+    void showTemperature(float temp);
+    void showPressuresAndTemperature(float temp, int val0, int val1);
     void printLabels();
+    void clear();
     
   private :
     bool displayInverted;
     SSD1306AsciiWire ssd1306;
     String getPadded(int num);
-    void printValue(byte col, byte row, int value);
+    void printValue(byte col, byte row, int value, bool showLastDecimalValue);
+    void printTemperatureSmall(byte col, byte row, int value);
+    void handlePressuresAlarm(int val0, int val1);
 };
 
 #endif

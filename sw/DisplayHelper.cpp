@@ -21,7 +21,62 @@ void DisplayHelper::init() {
   ssd1306.ssd1306WriteCmd(0);
 }
 
+void DisplayHelper::showPressures(int oilPressure, int gasPressure) {
+  handlePressuresAlarm(oilPressure, gasPressure);
+  printLabels();
+  drawBar(1, oilPressure);
+  drawBar(121, gasPressure);
+  ssd1306.setFont(lcdnums12x16);
+  ssd1306.set2X();  
+  printValue(23, 0, oilPressure, true);
+  printValue(23, 4, gasPressure, true);
+}
+
+void DisplayHelper::showTemperature(float temperature) {
+  String temp = getPadded(temperature * 10);
+
+  ssd1306.setCursor(0, 0);
+  ssd1306.setFont(Adafruit5x7);
+  ssd1306.set2X();
+  ssd1306.println("TMP OLEO");      
+  ssd1306.setFont(lcdnums14x24);
+  ssd1306.setCol(4);
+
+  ssd1306.print(temp[0]); 
+  ssd1306.print(temp[1]); 
+  ssd1306.print(temp[2]); 
+
+  uint8_t r = ssd1306.row();
+  uint8_t c = ssd1306.col();
+
+  byte dot = 0b1111000;
+  ssd1306.setRow(r + 5);
+  ssd1306.setCol(c + 2);
+  ssd1306.ssd1306WriteRam(dot);
+  ssd1306.setCol(c + 3);
+  ssd1306.ssd1306WriteRam(dot);
+  ssd1306.setCol(c + 4);
+  ssd1306.ssd1306WriteRam(dot);
+  ssd1306.setCol(c + 5);
+  ssd1306.ssd1306WriteRam(dot);
+  ssd1306.setCol(c + 7);
+  
+  ssd1306.setRow(r);
+
+  ssd1306.print(temp[3]);
+}
+
+void DisplayHelper::showPressuresAndTemperature(float temp, int oilPressure, int gasPressure) {
+  handlePressuresAlarm(oilPressure, gasPressure);
+  ssd1306.setFont(lcdnums12x16);
+  ssd1306.set2X();
+  printValue(0, 0, oilPressure, false);
+  printValue(73, 0, gasPressure, false);
+  printTemperatureSmall(13, 4, temp * 10);
+}
+
 void DisplayHelper::printLabels() {
+  ssd1306.set1X();
   ssd1306.setFont(font8x8);
   ssd1306.setCursor(15, 0);
   ssd1306.print('O');
@@ -101,17 +156,12 @@ void DisplayHelper::drawBar(byte startColumn, int inputValue) {
   }
 }
 
-void DisplayHelper::showValues(int val0, int val1) {
-  ssd1306.setFont(lcdnums12x16);
-  ssd1306.set2X();  
-  printValue(23, 0, val0);
-  printValue(23, 4, val1);
-}
-
-void DisplayHelper::printValue(byte col, byte row, int value) {
+void DisplayHelper::printTemperatureSmall(byte col, byte row, int value) {
   String str = getPadded(value);
   ssd1306.setCursor(col, row);
   ssd1306.print(str[0]);
+  ssd1306.print(str[1]);
+  ssd1306.print(str[2]);
 
   uint8_t r = ssd1306.row();
   uint8_t c = ssd1306.col();
@@ -128,8 +178,42 @@ void DisplayHelper::printValue(byte col, byte row, int value) {
   
   ssd1306.setRow(r);
   
-  ssd1306.print(str[1]);  
+  ssd1306.print(str[3]);
+}
+
+void DisplayHelper::printValue(byte col, byte row, int value, bool showLastDecimalValue) {
+  String str = getPadded(value);
+  ssd1306.setCursor(col, row);
+  ssd1306.print(str[1]);
+
+  uint8_t r = ssd1306.row();
+  uint8_t c = ssd1306.col();
+
+  byte dot = 0b1110000;
+  ssd1306.setRow(r + 3);
+  ssd1306.setCol(c + 2);
+  ssd1306.ssd1306WriteRam(dot);
+  ssd1306.setCol(c + 3);
+  ssd1306.ssd1306WriteRam(dot);
+  ssd1306.setCol(c + 4);
+  ssd1306.ssd1306WriteRam(dot);
+  ssd1306.setCol(c + 7);
+  
+  ssd1306.setRow(r);
+  
   ssd1306.print(str[2]);
+
+  if (showLastDecimalValue) {
+    ssd1306.print(str[3]);
+  }  
+}
+
+void DisplayHelper::handlePressuresAlarm(int oilPressure, int gasPressure) {
+  if (oilPressure < OIL_PRESSURE_LIMIT || gasPressure < GAS_PRESSURE_LIMIT) {
+    setInverted(true);
+  } else {
+    setInverted(false);
+  }
 }
 
 void DisplayHelper::drawLogo() {
@@ -155,7 +239,11 @@ void DisplayHelper::setInverted(bool mode) {
 }
 
 String DisplayHelper::getPadded(int num) {
-  char buff[4];
-  sprintf(buff, "%.3u\0", num); // buff will be "012\0"
+  char buff[5];
+  sprintf(buff, "%.4u\0", num);
   return String(buff);
+}
+
+void DisplayHelper::clear() {
+  ssd1306.clear();
 }

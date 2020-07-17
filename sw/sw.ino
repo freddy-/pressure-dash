@@ -4,45 +4,109 @@
 #include <string.h>
 
 #define BUTTON 2
+#define OIL A1
+#define GAS A2
+#define ADDR_PAGE_COUNTER 0
+#define NR_PAGES 3
 
 DisplayHelper display;
+byte pageCounter = 2;
+bool pageChanged = false;
 
 void setup() {
   display.init();
   display.drawLogo();
-  display.printLabels();
+
+  analogReference(INTERNAL); // 1.1v
 
   pinMode(A0, INPUT);
   pinMode(A1, INPUT);
+  pinMode(A2, INPUT);
+  pinMode(BUTTON, INPUT_PULLUP);
+
+  pageCounter = EEPROM.read(ADDR_PAGE_COUNTER);
 
   Serial.begin(9600);
 }
 
 void loop() {
-  float val0 = analogRead(A0);
-  float val1 = analogRead(A1);
+  readButtonState();
 
-  //TODO criar média de valores, ler 10x com um certo intervalo de tempo e tirar a media
+  if (pageChanged) {
+    display.clear();
+  }
 
-  Serial.println(val0);
-  Serial.println(val1);
+  switch (pageCounter) {
+    case 0:
+      display.showPressures(readPressure(OIL), readPressure(GAS));
+      break;
+      
+    case 1:
+      display.showTemperature(temp());
+      break;
 
-  // 7BAR 984ADC 4.80441v
-  // 0BAR  92ADC 0.45146v
+    case 2:
+      display.showPressuresAndTemperature(temp(), readPressure(OIL), readPressure(GAS));
+      break;
+  }
   
-  val0 = map(val0, 92, 984, 0, 700);
-  val1 = map(val1, 92, 984, 0, 700);
+  //delay(200);
+  savePageChange();
+}
 
-  Serial.println(val0);
-  Serial.println(val1);
-  Serial.println("----");
+void readButtonState() {
+  if (digitalRead(BUTTON) == LOW) {
+    delay(100);
+    pageCounter++;
+    pageChanged = true;
+    if (pageCounter >= NR_PAGES) {
+      pageCounter = 0;
+    }
+    while (digitalRead(BUTTON) == LOW);
+  }
+}
+
+void savePageChange() {
+  if (pageChanged) {
+     EEPROM.write(ADDR_PAGE_COUNTER, pageCounter);
+  }
+  pageChanged = false;
+}
+
+// https://create.arduino.cc/projecthub/Marcazzan_M/how-easy-is-it-to-use-a-thermistor-e39321
+#define R 18000 // valor do resistor divisor de tensao em ohms, necessario mensurar com multimetro
+#define B 3889.58 // valor beta do termistor
+
+#define VCC 5.0 // alimentacao do divisor
+#define VREF 1.1 // tensao referencia do ADC
+#define RT_AT_25 2727.05 // resistencia do termistor a 25 graus
+#define T_25_C_AT_KELVIN 298.15
+#define ADC_SAMPLES 10
+
+float temp() {
+  float VRT = 0;
+  for(byte c = 0; c < ADC_SAMPLES; c++) {
+    VRT += analogRead(A0);
+    delay(10);
+  }
+  VRT /= ADC_SAMPLES;
   
-  display.drawBar(1, val0);
-  display.drawBar(121, val1);
+  VRT = (VREF / 1023.00) * VRT;
+  float RT = VRT / ((VCC - VRT) / R); // resistencia do termistor
 
-  display.showValues(val0, val1);
+  float tmp = log(RT / RT_AT_25);
+  tmp = (1 / ((tmp / B) + (1 / T_25_C_AT_KELVIN))); //Temperature from thermistor
+  
+  return tmp - 273.15;
+}
 
-  Serial.println();
+int readPressure(byte port) {
+  unsigned int adc = 0;
+  for(byte c = 0; c < ADC_SAMPLES; c++) {
+    adc += analogRead(port);
+    delay(10);
+  }
+  adc /= ADC_SAMPLES;
 
-  //delay(1000);
+  return map(adc, 68, 862, 0, 700);
 }
