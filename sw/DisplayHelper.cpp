@@ -36,7 +36,7 @@ void DisplayHelper::showTemperature(float temperature) {
   String temp = getPadded(temperature * 10);
 
   ssd1306.setCursor(0, 0);
-  ssd1306.setFont(Adafruit5x7);
+  ssd1306.setFont(font8x8);
   ssd1306.set2X();
   ssd1306.println("TMP OLEO");      
   ssd1306.setFont(lcdnums14x24);
@@ -104,19 +104,8 @@ void DisplayHelper::drawBar(byte startColumn, int inputValue) {
 
   // calcula quantas paginas terão 100% de preenchimento
   if (fullBarNumber > 0) {
-      for (; lineCounter >= (8 - fullBarNumber); lineCounter--) {
-      ssd1306.setCursor(startColumn, lineCounter);
-      ssd1306.ssd1306WriteRam(255);
-      ssd1306.setCursor(startColumn + 1, lineCounter);
-      ssd1306.ssd1306WriteRam(255);
-      ssd1306.setCursor(startColumn + 2, lineCounter);
-      ssd1306.ssd1306WriteRam(255);
-      ssd1306.setCursor(startColumn + 3, lineCounter);
-      ssd1306.ssd1306WriteRam(255);
-      ssd1306.setCursor(startColumn + 4, lineCounter);
-      ssd1306.ssd1306WriteRam(255);
-      ssd1306.setCursor(startColumn + 5, lineCounter);
-      ssd1306.ssd1306WriteRam(255);
+    for (; lineCounter >= (8 - fullBarNumber); lineCounter--) {
+      fillBar(startColumn, lineCounter, 255);      
     }
   }
 
@@ -124,35 +113,19 @@ void DisplayHelper::drawBar(byte startColumn, int inputValue) {
   byte val = 0;
   for (byte bitCounter = 8; bitCounter > (8 - (int)value % 8); bitCounter--) {
     val |= 1 << (bitCounter - 1);
-  }
-  
-  ssd1306.setCursor(startColumn, lineCounter);
-  ssd1306.ssd1306WriteRam(val);
-  ssd1306.setCursor(startColumn + 1, lineCounter);
-  ssd1306.ssd1306WriteRam(val);
-  ssd1306.setCursor(startColumn + 2, lineCounter);
-  ssd1306.ssd1306WriteRam(val);
-  ssd1306.setCursor(startColumn + 3, lineCounter);
-  ssd1306.ssd1306WriteRam(val);
-  ssd1306.setCursor(startColumn + 4, lineCounter);
-  ssd1306.ssd1306WriteRam(val);
-  ssd1306.setCursor(startColumn + 5, lineCounter);
-  ssd1306.ssd1306WriteRam(val);
+  }  
+  fillBar(startColumn, lineCounter, val);
 
   // apaga o restante acima
   for (; lineCounter--; ) {
-    ssd1306.setCursor(startColumn, lineCounter);
-    ssd1306.ssd1306WriteRam(0);
-    ssd1306.setCursor(startColumn + 1, lineCounter);
-    ssd1306.ssd1306WriteRam(0);
-    ssd1306.setCursor(startColumn + 2, lineCounter);
-    ssd1306.ssd1306WriteRam(0);
-    ssd1306.setCursor(startColumn + 3, lineCounter);
-    ssd1306.ssd1306WriteRam(0);
-    ssd1306.setCursor(startColumn + 4, lineCounter);
-    ssd1306.ssd1306WriteRam(0);
-    ssd1306.setCursor(startColumn + 5, lineCounter);
-    ssd1306.ssd1306WriteRam(0);
+    fillBar(startColumn, lineCounter, 0);
+  }
+}
+
+void DisplayHelper::fillBar(byte column, byte line, byte value) {
+  for (byte c = 0; c < 6; c++) {
+    ssd1306.setCursor(column + c, line);
+    ssd1306.ssd1306WriteRam(value);
   }
 }
 

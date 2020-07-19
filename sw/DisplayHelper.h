@@ -5,7 +5,7 @@
 #include "SSD1306Ascii.h"
 #include "SSD1306AsciiWire.h"
 
-#define I2C_ADDRESS 0x3D
+#define I2C_ADDRESS 0x3C // 3D pra simulação, 3C para placa
 #define SHIFT_UP_RPM 2000
 #define OIL_PRESSURE_LIMIT 80
 #define GAS_PRESSURE_LIMIT 200
@@ -30,6 +30,7 @@ class DisplayHelper {
     void printValue(byte col, byte row, int value, bool showLastDecimalValue);
     void printTemperatureSmall(byte col, byte row, int value);
     void handlePressuresAlarm(int val0, int val1);
+    void DisplayHelper::fillBar(byte column, byte line, byte value);
 };
 
 #endif

@@ -1,7 +1,5 @@
 #include <EEPROM.h>
 #include "DisplayHelper.h"
-#include <stdlib.h>
-#include <string.h>
 
 #define BUTTON 2
 #define OIL A1
@@ -68,20 +66,20 @@ void readButtonState() {
 
 void savePageChange() {
   if (pageChanged) {
-     EEPROM.write(ADDR_PAGE_COUNTER, pageCounter);
+    EEPROM.write(ADDR_PAGE_COUNTER, pageCounter);
   }
   pageChanged = false;
 }
 
 // https://create.arduino.cc/projecthub/Marcazzan_M/how-easy-is-it-to-use-a-thermistor-e39321
-#define R 18000 // valor do resistor divisor de tensao em ohms, necessario mensurar com multimetro
+#define R 17740 // valor do resistor divisor de tensao em ohms, necessario mensurar com multimetro
 #define B 3889.58 // valor beta do termistor
 
 #define VCC 5.0 // alimentacao do divisor
-#define VREF 1.1 // tensao referencia do ADC
+#define VREF 0.996 // tensao referencia do ADC
 #define RT_AT_25 2727.05 // resistencia do termistor a 25 graus
 #define T_25_C_AT_KELVIN 298.15
-#define ADC_SAMPLES 10
+#define ADC_SAMPLES 25
 
 float temp() {
   float VRT = 0;
@@ -107,6 +105,12 @@ int readPressure(byte port) {
     delay(10);
   }
   adc /= ADC_SAMPLES;
-
+  adc = clampPressureValue(adc);
   return map(adc, 68, 862, 0, 700);
+}
+
+int clampPressureValue(int pressure) {
+  if (pressure > 862) return 862;
+  if (pressure < 68) return 68;
+  return pressure;
 }
