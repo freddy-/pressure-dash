@@ -1,4 +1,4 @@
-update=Tue 14 Jul 2020 11:37:00 PM -03
+update=Sun 19 Jul 2020 08:26:04 PM -03
 version=1
 last_client=kicad
 [general]
@@ -34,7 +34,7 @@ LibDir=
 [schematic_editor]
 version=1
 PageLayoutDescrFile=
-PlotDirectoryName=../../../pressure-dash/hw/
+PlotDirectoryName=./
 SubpartIdSeparator=0
 SubpartFirstId=65
 NetFmtName=
