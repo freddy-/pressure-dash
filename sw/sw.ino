@@ -51,11 +51,11 @@ void loop() {
       break;
       
     case 1:
-      display.showTemperature(temp());
+      display.showTemperature(readTemperature());
       break;
 
     case 2:
-      display.showPressuresAndTemperature(temp(), readOilPressure(), readGasPressure());
+      display.showPressuresAndTemperature(readTemperature(), readOilPressure(), readGasPressure());
       break;
   }
   
@@ -82,7 +82,7 @@ void savePageChange() {
   pageChanged = false;
 }
 
-float temp() {
+float readTemperature() {
   float tmp = readResistance(TEMPERATURE, TEMP_RESISTOR_DIVIDER);
   tmp = log(tmp / RT_AT_25);
   tmp = (1 / ((tmp / BETA_THERMISTOR) + (1 / T_25_C_AT_KELVIN))); //Temperature from thermistor  
