@@ -5,7 +5,7 @@
 #include "SSD1306Ascii.h"
 #include "SSD1306AsciiWire.h"
 
-#define I2C_ADDRESS 0x3C // 3D pra simulação, 3C para placa
+#define I2C_ADDRESS 0x3C
 #define SHIFT_UP_RPM 2000
 #define OIL_PRESSURE_LIMIT 80
 #define GAS_PRESSURE_LIMIT 200
