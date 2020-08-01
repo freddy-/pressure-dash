@@ -9,18 +9,18 @@
 #define NR_PAGES 3
 #define OIL_RESISTOR_DIVIDER 668
 #define GAS_RESISTOR_DIVIDER 680
-#define OIL_PRESSURE_ERROR 0
-#define GAS_PRESSURE_ERROR 0
+#define OIL_PRESSURE_ERROR 25
+#define GAS_PRESSURE_ERROR 5
 // https://create.arduino.cc/projecthub/Marcazzan_M/how-easy-is-it-to-use-a-thermistor-e39321
 #define TEMP_RESISTOR_DIVIDER 17740 // valor do resistor divisor de tensao em ohms, necessario mensurar com multimetro
 #define BETA_THERMISTOR 3889.58 // valor beta do termistor
 
 #define VCC 5.0 // alimentacao do divisor
-//#define VREF 0.996 // tensao referencia do ADC
-#define VREF 1.1 // tensao referencia do ADC simulação
+#define VREF 0.996 // tensao referencia do ADC
+//#define VREF 1.1 // tensao referencia do ADC simulação
 #define RT_AT_25 2727.05 // resistencia do termistor a 25 graus
 #define T_25_C_AT_KELVIN 298.15
-#define ADC_SAMPLES 25
+#define ADC_SAMPLES 10
 
 
 DisplayHelper display;
@@ -100,6 +100,7 @@ int readGasPressure() {
 int readPressure(byte port, int knownResistance, byte error) {
   float res = readResistance(port, knownResistance);
   res = res - error;
+  res = res - (res * 0.10);
   res = res * 100;
   res = clampPressureValue(res);
   return map(res, 1000, 15466, 0, 700);
