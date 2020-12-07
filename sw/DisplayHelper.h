@@ -7,8 +7,8 @@
 
 #define I2C_ADDRESS 0x3C
 #define SHIFT_UP_RPM 2000
-#define OIL_PRESSURE_LIMIT 80
-#define GAS_PRESSURE_LIMIT 200
+#define OIL_PRESSURE_LIMIT 80  // 0.8 bar
+#define GAS_PRESSURE_LIMIT 200 // 2.0 bar
 
 class DisplayHelper {
   public:

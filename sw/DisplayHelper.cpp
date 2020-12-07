@@ -98,7 +98,7 @@ void DisplayHelper::printLabels() {
 }
 
 void DisplayHelper::drawBar(byte startColumn, int inputValue) {
-  float value = map(inputValue, 0, 700, 0, 63);
+  float value = map(inputValue, 0, 999, 0, 63);
   byte fullBarNumber = value / 8;
   byte lineCounter = 7;
 

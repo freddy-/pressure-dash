@@ -7,16 +7,24 @@
 #define GAS A2
 #define ADDR_PAGE_COUNTER 0
 #define NR_PAGES 3
-#define OIL_RESISTOR_DIVIDER 668
-#define GAS_RESISTOR_DIVIDER 680
 #define OIL_PRESSURE_ERROR 25
 #define GAS_PRESSURE_ERROR 5
+
+#define MAX_ADC 1023.0
+#define PRESSURE_SENSOR_OFFSET 0.998
+#define PRESSURE_SENSOR_V_MIN 1.0  /* Volts */
+#define PRESSURE_SENSOR_V_MAX 5.0  /* Volts */
+#define PRESSURE_SENSOR_P_MIN 0.0  /* bar */
+#define PRESSURE_SENSOR_P_MAX 10.0 /* bar */
+#define PRESSURE_SENSOR_KPV (PRESSURE_SENSOR_P_MAX - PRESSURE_SENSOR_P_MIN) / (PRESSURE_SENSOR_V_MAX - PRESSURE_SENSOR_V_MIN)
+
+
 // https://create.arduino.cc/projecthub/Marcazzan_M/how-easy-is-it-to-use-a-thermistor-e39321
 #define TEMP_RESISTOR_DIVIDER 17740 // valor do resistor divisor de tensao em ohms, necessario mensurar com multimetro
 #define BETA_THERMISTOR 3889.58 // valor beta do termistor
 
 #define VCC 5.0 // alimentacao do divisor
-#define VREF 0.996 // tensao referencia do ADC
+#define VREF 5.0 // tensao referencia do ADC
 //#define VREF 1.1 // tensao referencia do ADC simulação
 #define RT_AT_25 2727.05 // resistencia do termistor a 25 graus
 #define T_25_C_AT_KELVIN 298.15
@@ -31,7 +39,7 @@ void setup() {
   display.init();
   display.drawLogo();
 
-  analogReference(INTERNAL); // 1.1v
+  //analogReference(INTERNAL); // 1.1v
 
   pinMode(BUTTON, INPUT_PULLUP);
 
@@ -90,36 +98,35 @@ float readTemperature() {
 }
 
 int readOilPressure() {
-  return readPressure(OIL, OIL_RESISTOR_DIVIDER, OIL_PRESSURE_ERROR);
+  return 0;
 }
 
 int readGasPressure() {
-  return readPressure(GAS, GAS_RESISTOR_DIVIDER, GAS_PRESSURE_ERROR);
+  return readPressure(GAS, PRESSURE_SENSOR_OFFSET);
 }
 
-int readPressure(byte port, int knownResistance, byte error) {
-  float res = readResistance(port, knownResistance);
-  res = res - error;
-  res = res - (res * 0.10);
-  res = res * 100;
-  res = clampPressureValue(res);
-  return map(res, 1000, 15466, 0, 700);
+int readPressure(byte port, float offset) {
+  float voltage = (readAnalogMeanValue(port) * VCC) / MAX_ADC;
+  return clampPressureValue(PRESSURE_SENSOR_KPV * ((float)voltage - offset) * 100);
 }
 
 float readResistance(byte port, int knownResistance) {
+  float tmp = readAnalogMeanValue(port);  
+  tmp = (VREF / 1023.00) * tmp;
+  return tmp / ((VCC - tmp) / knownResistance);
+}
+
+float readAnalogMeanValue(byte port) {
   float tmp = 0;
   for(byte c = 0; c < ADC_SAMPLES; c++) {
     tmp += analogRead(port);
     delay(10);
   }
-  tmp /= ADC_SAMPLES;
-  
-  tmp = (VREF / 1023.00) * tmp;
-  return tmp / ((VCC - tmp) / knownResistance);
+  return tmp / ADC_SAMPLES;
 }
 
 int clampPressureValue(int pressure) {
-  if (pressure > 15466) return 15466;
-  if (pressure < 1000) return 1000;
+  if (pressure > 999) return 999;
+  if (pressure < 0) return 0;
   return pressure;
 }
