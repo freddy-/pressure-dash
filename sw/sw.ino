@@ -22,13 +22,12 @@
 // https://create.arduino.cc/projecthub/Marcazzan_M/how-easy-is-it-to-use-a-thermistor-e39321
 #define TEMP_RESISTOR_DIVIDER 17740 // valor do resistor divisor de tensao em ohms, necessario mensurar com multimetro
 #define BETA_THERMISTOR 3889.58 // valor beta do termistor
-
+#define TEMPERATURE_ERROR 4 // diferença entre medições feitas com multimetro minipa
 #define VCC 5.0 // alimentacao do divisor
 #define VREF 5.0 // tensao referencia do ADC
-//#define VREF 1.1 // tensao referencia do ADC simulação
 #define RT_AT_25 2727.05 // resistencia do termistor a 25 graus
 #define T_25_C_AT_KELVIN 298.15
-#define ADC_SAMPLES 10
+#define ADC_SAMPLES 30
 
 
 DisplayHelper display;
@@ -38,8 +37,6 @@ bool pageChanged = false;
 void setup() {
   display.init();
   display.drawLogo();
-
-  //analogReference(INTERNAL); // 1.1v
 
   pinMode(BUTTON, INPUT_PULLUP);
 
@@ -94,11 +91,11 @@ float readTemperature() {
   float tmp = readResistance(TEMPERATURE, TEMP_RESISTOR_DIVIDER);
   tmp = log(tmp / RT_AT_25);
   tmp = (1 / ((tmp / BETA_THERMISTOR) + (1 / T_25_C_AT_KELVIN))); //Temperature from thermistor  
-  return tmp - 273.15;
+  return tmp - 273.15 + TEMPERATURE_ERROR;
 }
 
 int readOilPressure() {
-  return 0;
+  return readPressure(OIL, PRESSURE_SENSOR_OFFSET);
 }
 
 int readGasPressure() {

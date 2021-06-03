@@ -22,7 +22,6 @@ void DisplayHelper::init() {
 }
 
 void DisplayHelper::showPressures(int oilPressure, int gasPressure) {
-  handlePressuresAlarm(oilPressure, gasPressure);
   printLabels();
   drawBar(1, oilPressure);
   drawBar(121, gasPressure);
@@ -67,7 +66,6 @@ void DisplayHelper::showTemperature(float temperature) {
 }
 
 void DisplayHelper::showPressuresAndTemperature(float temp, int oilPressure, int gasPressure) {
-  handlePressuresAlarm(oilPressure, gasPressure);
   ssd1306.setFont(lcdnums12x16);
   ssd1306.set2X();
   printValue(0, 0, oilPressure, false);
@@ -179,14 +177,6 @@ void DisplayHelper::printValue(byte col, byte row, int value, bool showLastDecim
   if (showLastDecimalValue) {
     ssd1306.print(str[3]);
   }  
-}
-
-void DisplayHelper::handlePressuresAlarm(int oilPressure, int gasPressure) {
-  if (oilPressure < OIL_PRESSURE_LIMIT || gasPressure < GAS_PRESSURE_LIMIT) {
-    setInverted(true);
-  } else {
-    setInverted(false);
-  }
 }
 
 void DisplayHelper::drawLogo() {
