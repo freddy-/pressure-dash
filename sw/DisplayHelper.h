@@ -3,7 +3,7 @@
 
 #include <Wire.h>
 #include "SSD1306Ascii.h"
-#include "SSD1306AsciiWire.h"
+#include "SSD1306AsciiAvrI2c.h"
 
 #define I2C_ADDRESS 0x3C
 #define SHIFT_UP_RPM 2000
@@ -22,10 +22,11 @@ class DisplayHelper {
     void showPressuresAndTemperature(float temp, int val0, int val1);
     void printLabels();
     void clear();
+    uint8_t shoudClear();
     
   private :
     bool displayInverted;
-    SSD1306AsciiWire ssd1306;
+    SSD1306AsciiAvrI2c ssd1306;
     String getPadded(int num);
     void printValue(byte col, byte row, int value, bool showLastDecimalValue);
     void printTemperatureSmall(byte col, byte row, int value);

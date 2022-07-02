@@ -20,14 +20,14 @@
 
 
 // https://create.arduino.cc/projecthub/Marcazzan_M/how-easy-is-it-to-use-a-thermistor-e39321
-#define TEMP_RESISTOR_DIVIDER 17740 // valor do resistor divisor de tensao em ohms, necessario mensurar com multimetro
+#define TEMP_RESISTOR_DIVIDER 997 // valor do resistor divisor de tensao em ohms, necessario mensurar com multimetro
 #define BETA_THERMISTOR 3889.58 // valor beta do termistor
 #define TEMPERATURE_ERROR 4 // diferença entre medições feitas com multimetro minipa
 #define VCC 5.0 // alimentacao do divisor
 #define VREF 5.0 // tensao referencia do ADC
 #define RT_AT_25 2727.05 // resistencia do termistor a 25 graus
 #define T_25_C_AT_KELVIN 298.15
-#define ADC_SAMPLES 30
+#define ADC_SAMPLES 10
 
 
 DisplayHelper display;
@@ -35,6 +35,7 @@ byte pageCounter = 2;
 bool pageChanged = false;
 
 void setup() {
+  delay(1000);
   display.init();
   display.drawLogo();
 
@@ -46,7 +47,7 @@ void setup() {
 void loop() {
   readButtonState();
 
-  if (pageChanged) {
+  if (pageChanged || display.shoudClear()) {
     display.clear();
   }
 
@@ -64,7 +65,6 @@ void loop() {
       break;
   }
   
-  //delay(200);
   savePageChange();
 }
 
@@ -117,7 +117,6 @@ float readAnalogMeanValue(byte port) {
   float tmp = 0;
   for(byte c = 0; c < ADC_SAMPLES; c++) {
     tmp += analogRead(port);
-    delay(10);
   }
   return tmp / ADC_SAMPLES;
 }

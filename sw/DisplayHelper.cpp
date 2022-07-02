@@ -1,6 +1,6 @@
 #include <Wire.h>
 #include "SSD1306Ascii.h"
-#include "SSD1306AsciiWire.h"
+#include "SSD1306AsciiAvrI2c.h"
 #include "DisplayHelper.h"
 #include "vw_logo.h"
 
@@ -9,8 +9,9 @@ DisplayHelper::DisplayHelper() {
 }
 
 void DisplayHelper::init() {  
-  Wire.begin();
-  Wire.setClock(400000L);
+  //Wire.begin();
+  //Wire.setClock(100000L);
+  
   ssd1306.begin(&Adafruit128x64, I2C_ADDRESS);
   ssd1306.setContrast(255);
 
@@ -209,4 +210,8 @@ String DisplayHelper::getPadded(int num) {
 
 void DisplayHelper::clear() {
   ssd1306.clear();
+}
+
+uint8_t DisplayHelper::shoudClear() {
+  return ssd1306.shoudClear();
 }
